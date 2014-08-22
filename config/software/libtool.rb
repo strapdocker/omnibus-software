@@ -31,12 +31,13 @@ relative_path "libtool-#{version}"
 
 build do
   # AIX uses gcc/g++ instead of xlc/xlC
-  env = with_standard_compiler_flags(with_embedded_path, aix: { use_gcc: true })
+#  env = with_standard_compiler_flags(with_embedded_path, aix: { use_gcc: true })
+  env = with_standard_compiler_flags(with_embedded_path)
 
   if aix?
     command "./configure" \
-            " --prefix=#{install_dir}/embedded" \
-            " --with-gcc", env: env
+            " --prefix=#{install_dir}/embedded", env: env # \
+#            " --with-gcc", env: env
   else
     command "./configure" \
             " --prefix=#{install_dir}/embedded", env: env

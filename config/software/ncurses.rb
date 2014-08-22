@@ -41,7 +41,7 @@ relative_path "ncurses-5.9"
 ########################################################################
 
 build do
-  env = with_standard_compiler_flags(with_embedded_path, aix: { use_gcc: true })
+  env = with_standard_compiler_flags(with_embedded_path, aix: { use_xlc: false })
 
   # gcc4 from opencsw fails to compile ncurses
   if solaris2?
@@ -69,7 +69,7 @@ build do
   end
 
   if aix?
-    patch source: "patch-aix-configure", plevel: 0
+    patch source: "patch-aix-configure", plevel: 0, patch_command: "/opt/freeware/bin/patch"
   end
 
   if mac_os_x?
