@@ -19,7 +19,7 @@ name "openssl"
 dependency "zlib"
 dependency "cacerts"
 dependency "libgcc"
-dependency "makedepend"
+#dependency "makedepend"
 
 
 if aix?
