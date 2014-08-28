@@ -18,7 +18,6 @@ name "ncurses"
 default_version "5.9"
 
 dependency "libgcc"
-dependency "libtool" if aix?
 
 source url: "http://ftp.gnu.org/gnu/ncurses/ncurses-5.9.tar.gz",
        md5: "8cb9c412e5f2d96bc6f459aa8c6282a1"
@@ -41,7 +40,7 @@ relative_path "ncurses-5.9"
 ########################################################################
 
 build do
-  env = with_standard_compiler_flags(with_embedded_path, aix: { use_xlc: false })
+  env = with_standard_compiler_flags(with_embedded_path)
 
   # gcc4 from opencsw fails to compile ncurses
   if solaris2?
@@ -91,12 +90,13 @@ build do
     "--with-termlib",
     "--without-debug",
     "--without-normal", # AIX doesn't like building static libs
+    "--without-ada",
     "--enable-overwrite",
     "--enable-widec",
   ]
 
   if aix?
-    cmd << "--with-libtool"
+    cmd << "--without-cxx-binding"
   end
 
   command cmd.join(" "), env: env
@@ -113,11 +113,12 @@ build do
     "--with-termlib",
     "--without-debug",
     "--without-normal",
+    "--without-ada",
     "--enable-overwrite",
   ]
 
   if aix?
-    cmd << "--with-libtool"
+    cmd << "--without-cxx-binding"
   end
 
   command cmd.join(" "), env: env
