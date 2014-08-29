@@ -49,15 +49,10 @@ when "mac_os_x"
   env['CFLAGS'] << " -I#{install_dir}/embedded/include/ncurses -arch x86_64 -m64 -O3 -g -pipe -Qunused-arguments"
   env['LDFLAGS'] << " -arch x86_64"
 when "aix"
-  # -O2/O3 optimized away some configure test which caused ext libs to fail, so aix only gets -O
-  #
-  # We also need prezl's M4 instead of picking up /usr/bin/m4 which
-  # barfs on ruby.
   #
   # I believe -qhot was necessary to prevent segfaults in threaded libs
   #
-  env['CFLAGS'] << " -q64 -qhot"
-  env['M4'] = "/opt/freeware/bin/m4"
+  env['CFLAGS'] << " -qhot"
   env['warnflags'] = "-qinfo=por"
 else  # including solaris, linux
   env['CFLAGS'] << " -O3 -g -pipe"
@@ -75,13 +70,13 @@ build do
 
   case ohai['platform']
   when "aix"
-    patch source: "ruby-aix-configure.patch", plevel: 1
-    patch source: "ruby_aix_1_9_3_448_ssl_EAGAIN.patch", plevel: 1
+    # patch source: "ruby-aix-configure.patch", plevel: 1, patch_command: "/opt/freeware/bin/patch"
+    # patch source: "ruby_aix_1_9_3_448_ssl_EAGAIN.patch", plevel: 1, patch_command: "/opt/freeware/bin/patch"
     # our openssl-1.0.1h links against zlib and mkmf tests will fail due to zlib symbols not being
     # found if we do not include -lz.  this later leads to openssl functions being detected as not
     # being available and then internally vendored versions that have signature mismatches are pulled in
     # and the compile explodes.  this problem may not be unique to AIX, but is severe on AIX.
-    patch source: "ruby_aix_openssl.patch", plevel: 1
+    # patch source: "ruby_aix_openssl.patch", plevel: 1, patch_command: "/opt/freeware/bin/patch"
     # --with-opt-dir causes ruby to send bogus commands to the AIX linker
   when "freebsd"
     configure_command << "--without-execinfo"
@@ -104,11 +99,6 @@ build do
   else
     configure_command << "--with-opt-dir=#{install_dir}/embedded"
   end
-
-  # FFS: works around a bug that infects AIX when it picks up our pkg-config
-  # AFAIK, ruby does not need or use this pkg-config it just causes the build to fail.
-  # The alternative would be to patch configure to remove all the pkg-config garbage entirely
-  env.merge!("PKG_CONFIG" => "/bin/true") if aix?
 
   command configure_command.join(" "), env: env
   make "-j #{workers}", env: env
