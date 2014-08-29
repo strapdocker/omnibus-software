@@ -27,6 +27,7 @@ relative_path "libffi-3.0.13"
 
 build do
   env = with_standard_compiler_flags(with_embedded_path)
+  env["INSTALL"] = "/opt/freeware/bin/install" if aix?
 
   command "./configure" \
           " --prefix=#{install_dir}/embedded", env: env
