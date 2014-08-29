@@ -19,7 +19,6 @@ name "openssl"
 dependency "zlib"
 dependency "cacerts"
 dependency "libgcc"
-#dependency "makedepend"
 
 default_version "1.0.1i"
 source url: "http://www.openssl.org/source/openssl-1.0.1i.tar.gz",
@@ -28,7 +27,11 @@ source url: "http://www.openssl.org/source/openssl-1.0.1i.tar.gz",
 relative_path "openssl-#{version}"
 
 build do
-  patch :source => "openssl-1.0.1f-do-not-build-docs.patch"
+  if aix?
+    patch source: "openssl-1.0.1f-do-not-build-docs.patch", patch_command: "/opt/freeware/bin/patch"
+  else
+    patch source: "openssl-1.0.1f-do-not-build-docs.patch"
+  end
 
   env = case ohai["platform"]
         when "mac_os_x"
@@ -47,7 +50,7 @@ build do
             "OBJECT_MODE" => "64",
             "AR" => "/usr/bin/ar",
             "ARFLAGS" => "-X64 cru",
-            "M4" => "/opt/freeware/bin/m4",
+            "M4" => "/usr/bin/m4",
         }
         when "solaris2"
           {
@@ -133,6 +136,7 @@ build do
   command configure_command, env: env
   make "depend", env: env
   # make -j N on openssl is not reliable
-  make env: env
+  # don't make, then make install, otherwise ld flips out on AIX
+  # see https://github.com/opscode/omnibus-software/issues/279
   make "install", env: env
 end
